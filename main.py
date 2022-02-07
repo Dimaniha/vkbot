@@ -37,24 +37,20 @@ def pixiv_download():
             image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
             history(illust)
             tags(illust)
-            print("%s: %s" % (illust.title, image_url))
             if idx == 0:
                 api.download(image_url, path=var.photo_folder, name=None)
-                print("0")
                 break
             elif idx == 1:
                 url_basename = os.path.basename(image_url)
                 extension = os.path.splitext(url_basename)[1]
                 name = "%d_%s%s" % (illust.id, illust.title, extension)
                 api.download(image_url, path=var.photo_folder, name=name)
-                print("1")
                 break
             elif idx == 2:
                 api.download(image_url, path=var.photo_folder, fname='%s.jpg' % (illust.id))
                 break
             else:
                 api.download(image_url, path='/foo/bar', fname=open('%s/%s.jpg' % (var.photo_folder, illust.id), 'wb'))
-                print("4", '%s/illust_%s.jpg' % (var.photo_folder, illust.id))
                 break
     wall_post()
 
@@ -63,9 +59,7 @@ def wall_post():
     for pic in os.listdir(var.photo_folder):
         path = var.photo_folder + "/" + str(pic)
         match = re.match(r'\d+', str(pic))
-        print(match.group(0))
         pic = re.sub(r'\S+', str(match.group(0)), str(pic))
-        print(pic)
         tag_file = var.tag_dir + "/" + str(pic) + ".txt"
         with open(tag_file, 'ab') as f:
             f.seek(-2, os.SEEK_END)
