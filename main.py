@@ -31,7 +31,6 @@ def pixiv_download():
     api = AppPixivAPI()
     api.auth(refresh_token=var.refresh_token)
     json_result = api.illust_recommended()
-    print(json_result)
     for idx, illust in enumerate(json_result.illusts):
         while True:
             image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
