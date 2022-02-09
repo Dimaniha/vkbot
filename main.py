@@ -74,6 +74,8 @@ def wall_post():
         match = re.match(r'\d+', str(pic))
         pic = re.sub(r'\S+', str(match.group(0)), str(pic))
         tag_file = var.tag_dir + "/" + str(pic) + ".txt"
+        print(match.group(0))
+        print(pic)
         with open(tag_file, 'r') as f:
             tags = f.readline()
         upload = vk_api.VkUpload(vk_session)
