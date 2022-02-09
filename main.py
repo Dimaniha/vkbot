@@ -9,6 +9,7 @@ import json
 
 def tags(illust):
     tag_file = var.tag_dir + "/" + str(illust.id) + ".txt"
+    tags_to_write = []
     with open(tag_file, 'w+', encoding='utf-8') as f:
         for i in illust.tags:
             bookmark = re.search(r'.ookmarks', str(i.translated_name))
@@ -17,7 +18,15 @@ def tags(illust):
             elif bookmark:
                 continue
             else:
-                tag = re.sub(r'\s', '_', str(i.get("translated_name", i.translated_name)))
+                tags_to_write.append(i.translated_name)
+        sorted_list = list(set(tags_to_write))
+        last_sorted_list_item = len(sorted_list)
+        for i in range(0, last_sorted_list_item):
+            if i == last_sorted_list_item - 1:
+                tag = re.sub(r'\s', '_', str(sorted_list[i]))
+                f.write("#" + str(tag))
+            else:
+                tag = re.sub(r'\s', '_', str(sorted_list[i]))
                 f.write("#" + str(tag) + " | ")
 
 def history(illust):
@@ -32,25 +41,30 @@ def pixiv_download():
     api.auth(refresh_token=var.refresh_token)
     json_result = api.illust_recommended()
     for idx, illust in enumerate(json_result.illusts):
-        while True:
-            image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
-            history(illust)
-            tags(illust)
-            if idx == 0:
-                api.download(image_url, path=var.photo_folder, name=None)
-                break
-            elif idx == 1:
-                url_basename = os.path.basename(image_url)
-                extension = os.path.splitext(url_basename)[1]
-                name = "%d_%s%s" % (illust.id, illust.title, extension)
-                api.download(image_url, path=var.photo_folder, name=name)
-                break
-            elif idx == 2:
-                api.download(image_url, path=var.photo_folder, fname='%s.jpg' % (illust.id))
-                break
-            else:
-                api.download(image_url, path='/foo/bar', fname=open('%s/%s.jpg' % (var.photo_folder, illust.id), 'wb'))
-                break
+        last_item_prefered_tags = len(var.prefered_tags) - 1
+        last_item_tags = len(illust.tags) - 1
+        for prefered_tag in range(0, last_item_prefered_tags):
+            for tag in range(0, last_item_tags):
+                if re.search(rf'{var.prefered_tags[prefered_tag]}', str(illust.tags[tag].translated_name)):
+                    image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
+                    tags(illust)
+                    history(illust)
+                    if idx == 0:
+                        api.download(image_url, path=var.photo_folder, name=None)
+                        break
+                    elif idx == 1:
+                        url_basename = os.path.basename(image_url)
+                        extension = os.path.splitext(url_basename)[1]
+                        name = "%d_%s%s" % (illust.id, illust.title, extension)
+                        api.download(image_url, path=var.photo_folder, name=name)
+                        break
+                    elif idx == 2:
+                        api.download(image_url, path=var.photo_folder, fname='%s.jpg' % (illust.id))
+                        break
+                    else:
+                        api.download(image_url, path='/foo/bar', fname=open('%s/%s.jpg' % (var.photo_folder, illust.id), 'wb'))
+                        break
+            continue
     wall_post()
 
 def wall_post():
@@ -60,9 +74,6 @@ def wall_post():
         match = re.match(r'\d+', str(pic))
         pic = re.sub(r'\S+', str(match.group(0)), str(pic))
         tag_file = var.tag_dir + "/" + str(pic) + ".txt"
-        with open(tag_file, 'ab') as f:
-            f.seek(-2, os.SEEK_END)
-            f.truncate()
         with open(tag_file, 'r') as f:
             tags = f.readline()
         upload = vk_api.VkUpload(vk_session)
