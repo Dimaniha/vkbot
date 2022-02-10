@@ -41,8 +41,8 @@ def pixiv_download():
     api.auth(refresh_token=var.refresh_token)
     json_result = api.illust_recommended()
     for idx, illust in enumerate(json_result.illusts):
-        last_item_prefered_tags = len(var.prefered_tags) - 1
-        last_item_tags = len(illust.tags) - 1
+        last_item_prefered_tags = len(var.prefered_tags)
+        last_item_tags = len(illust.tags)
         for prefered_tag in range(0, last_item_prefered_tags):
             for tag in range(0, last_item_tags):
                 if re.search(rf'{var.prefered_tags[prefered_tag]}', str(illust.tags[tag].translated_name)):
