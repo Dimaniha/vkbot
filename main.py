@@ -5,6 +5,7 @@ import vk_api
 import var
 from pixivpy3 import *
 import re
+import telebot
 import json
 
 
@@ -33,7 +34,9 @@ def red_letter_day(today):
         illust_to_add = []
         for idx, illust in enumerate(json_result.illusts):
             len_lines = len(lines)
-            if len(lines) > 0:
+            if len(os.listdir(var.photo_folder)) == 48:
+                break
+            elif len(lines) > 0:
                 for t in range(0, len_lines):
                     if re.search(rf'{str(illust.id)}', str(lines[t])):
                         break
@@ -44,6 +47,7 @@ def red_letter_day(today):
             else:
                 illust_to_add.append(str(illust.id))
                 download(api, idx, illust)
+
         for i in illust_to_add:
             f.write(str(i) + '\n')
     prepare_to_post()
@@ -77,6 +81,7 @@ def prefered_tags_sort(illust, api, idx, illust_to_add):
         for tag in range(0, last_item_tags):
             if re.search(rf'{var.prefered_tags[prefered_tag]}',
                          str(illust.tags[tag].translated_name)):
+                print("preload")
                 download(api, idx, illust)
                 illust_to_add.append(str(illust.id))
             break
@@ -115,8 +120,11 @@ def vk_post(tags, path):
         'attachments': vk_photo_url
     })
 
+def tg_post(tags, path):
+    bot = telebot.TeleBot(var.API_TOKEN)
+    print("posted")
+    bot.send_photo(var.tg_chat_id, open(path, 'rb'), caption=tags)
 
-#def tg_post():
 def date_check():
     today = datetime.datetime.today().strftime('%d.%m')
     for day in var.red_letter_days.keys():
@@ -141,7 +149,7 @@ def prepare_to_post():
         with open(tag_file, 'r') as f:
             tags = f.readline()
         vk_post(tags, path)
-        #tg_post()
+        tg_post(tags, path)
         os.remove(path)
         os.remove(tag_file)
         if len(os.listdir(var.photo_folder)) == 0:
@@ -149,6 +157,7 @@ def prepare_to_post():
             date_check()
         else:
             time.sleep(1800)
+            date_check()
 
 def clear_last():
     if len(os.listdir(var.photo_folder)) > 0:
@@ -161,7 +170,6 @@ def clear_last():
             f.seek(0)
             f.truncate(0)
             len_lines = len(lines)
-            print(lines)
             numbers_list = []
             for i in photo_folder_content:
                 match = re.match(r'\d+', str(i))
