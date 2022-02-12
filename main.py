@@ -78,9 +78,9 @@ def prefered_tags_sort(illust, api, idx, illust_to_add):
             if re.search(rf'{var.prefered_tags[prefered_tag]}',
                          str(illust.tags[tag].translated_name)):
                 download(api, idx, illust)
+                illust_to_add.append(str(illust.id))
             break
         break
-    illust_to_add.append(str(illust.id))
 
 def pixiv_download():
     api = AppPixivAPI()
