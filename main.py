@@ -149,7 +149,6 @@ def prepare_to_post():
             date_check()
         else:
             time.sleep(1800)
-            date_check()
 
 def clear_last():
     if len(os.listdir(var.photo_folder)) > 0:
