@@ -123,7 +123,10 @@ def vk_post(tags, path):
 def tg_post(tags, path):
     bot = telebot.TeleBot(var.API_TOKEN)
     print("posted")
-    bot.send_photo(var.tg_chat_id, open(path, 'rb'), caption=tags)
+    try:
+        bot.send_photo(var.tg_chat_id, open(path, 'rb'), caption=tags)
+    except:
+        pass
 
 def date_check():
     today = datetime.datetime.today().strftime('%d.%m')
