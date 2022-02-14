@@ -10,7 +10,7 @@ import json
 
 
 def download(api, idx, illust):
-    image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
+    image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.medium)
     tags(illust)
     if idx == 0:
         api.download(image_url, path=var.photo_folder, name=None)
@@ -47,7 +47,6 @@ def red_letter_day(today):
             else:
                 illust_to_add.append(str(illust.id))
                 download(api, idx, illust)
-
         for i in illust_to_add:
             f.write(str(i) + '\n')
     prepare_to_post()
@@ -84,8 +83,7 @@ def prefered_tags_sort(illust, api, idx, illust_to_add):
                 print("preload")
                 download(api, idx, illust)
                 illust_to_add.append(str(illust.id))
-            break
-        break
+                break
 
 def pixiv_download():
     api = AppPixivAPI()
@@ -123,21 +121,7 @@ def vk_post(tags, path):
 def tg_post(tags, path):
     bot = telebot.TeleBot(var.API_TOKEN)
     print("posted")
-    try:
-        bot.send_photo(var.tg_chat_id, open(path, 'rb'), caption=tags)
-    except:
-        after_post(path, tag_file)
-    after_post(path, tag_file)
-
-def after_post(path, tag_file):
-    os.remove(path)
-    os.remove(tag_file)
-    if len(os.listdir(var.photo_folder)) == 0:
-        time.sleep(1750)
-        date_check()
-    else:
-        time.sleep(1800)
-        date_check()
+    bot.send_photo(var.tg_chat_id, open(path, 'rb'), caption=tags)
 
 def date_check():
     today = datetime.datetime.today().strftime('%d.%m')
@@ -162,16 +146,22 @@ def prepare_to_post():
         print(pic)
         with open(tag_file, 'r') as f:
             tags = f.readline()
-        vk_post(tags, path)
-        tg_post(tags, path)
-        os.remove(path)
-        os.remove(tag_file)
-        if len(os.listdir(var.photo_folder)) == 0:
-            time.sleep(1750)
-            date_check()
-        else:
-            time.sleep(1800)
-            date_check()
+        try:
+            vk_post(tags, path)
+            tg_post(tags, path)
+        except:
+            after_post(path, tag_file)
+        after_post(path, tag_file)
+
+def after_post(path, tag_file):
+    os.remove(path)
+    os.remove(tag_file)
+    if len(os.listdir(var.photo_folder)) == 0:
+        time.sleep(1750)
+        date_check()
+    else:
+        time.sleep(1800)
+        date_check()
 
 def clear_last():
     if len(os.listdir(var.photo_folder)) > 0:
