@@ -126,7 +126,18 @@ def tg_post(tags, path):
     try:
         bot.send_photo(var.tg_chat_id, open(path, 'rb'), caption=tags)
     except:
-        pass
+        after_post(path, tag_file)
+    after_post(path, tag_file)
+
+def after_post(path, tag_file):
+    os.remove(path)
+    os.remove(tag_file)
+    if len(os.listdir(var.photo_folder)) == 0:
+        time.sleep(1750)
+        date_check()
+    else:
+        time.sleep(1800)
+        date_check()
 
 def date_check():
     today = datetime.datetime.today().strftime('%d.%m')
